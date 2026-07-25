@@ -270,6 +270,10 @@
     <div class="card-label">反省点</div>
     <textarea id="reflection" placeholder="次に活かしたいこと、気づいたことなど"></textarea>
   </div>
+  <div class="card">
+    <div class="card-label">Claude先生のひとこと</div>
+    <textarea id="claudeMemo" placeholder="別チャットでもらったフィードバックを貼り付け"></textarea>
+  </div>
   <button class="submit-btn" id="submitBtn" onclick="submitLog()">記録する</button>
 </main>
 
@@ -390,6 +394,11 @@
           <div class="practice-section-label">反省点</div>
           <div class="practice-text">${record.reflection}</div>
         </div>` : ''}
+        ${record.claudeMemo ? `
+        <div>
+          <div class="practice-section-label">Claude先生のひとこと</div>
+          <div class="practice-text" style="color:#a78bfa;">${record.claudeMemo}</div>
+        </div>` : ''}
       </div>
     `;
 
@@ -412,6 +421,7 @@
     const payload = {
       practice:   document.getElementById('practice').value,
       reflection: document.getElementById('reflection').value,
+      claudeMemo: document.getElementById('claudeMemo').value,
     };
 
     try {
@@ -424,6 +434,7 @@
         showToast('✅ 記録しました', 'success');
         document.getElementById('practice').value   = '';
         document.getElementById('reflection').value = '';
+        document.getElementById('claudeMemo').value = '';
         reviewLoaded = false;
       } else {
         showToast('❌ エラー: ' + data.message, 'error');
