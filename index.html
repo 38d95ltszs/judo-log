@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>柔道練習ログ</title>
+  <style>
+    :root {
+      --bg:      #0f1117;
+      --surface: #1a1d27;
+      --border:  #2a2d3e;
+      --accent:  #3ecf6a;
+      --text:    #e8eaf0;
+      --muted:   #7a7d8e;
+      --radius:  12px;
+      --font:    'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      min-height: 100vh;
+      padding-bottom: 40px;
+    }
+
+    /* ── ヘッダー ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .judogi-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    header h1 {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── タブ ── */
+    .tabs {
+      display: flex;
+      max-width: 480px;
+      margin: 12px auto 0;
+      padding: 0 16px;
+      gap: 8px;
+    }
+    .tab-btn {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 0;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .tab-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: #3ecf6a18;
+    }
+
+    /* ── メイン ── */
+    main {
+      padding: 16px 16px;
+      max-width: 480px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* ── カード ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    /* ── テキストエリア ── */
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 15px;
+      padding: 10px 12px;
+      outline: none;
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.7;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    textarea:focus { border-color: var(--accent); }
+
+    /* ── 送信ボタン ── */
+    .submit-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: var(--font);
+      font-size: 16px;
+      font-weight: 700;
+      padding: 16px;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      transition: opacity 0.2s;
+    }
+    .submit-btn:active   { opacity: 0.8; }
+    .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── 振り返り ── */
+    .review-status {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 0;
+      font-size: 14px;
+    }
+
+    /* ── 並び替えトグル ── */
+    .sort-toggle {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .sort-btn {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--muted);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 0;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sort-btn.active {
+      border-color: #f7c94f;
+      color: #f7c94f;
+      background: #f7c94f18;
+    }
+
+    /* ── 練習カード ── */
+    .practice-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .practice-date {
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .practice-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .practice-text {
+      font-size: 15px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+    }
+
+    /* ── ページャー ── */
+    .pager {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .pager-btn {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 0;
+      cursor: pointer;
+    }
+    .pager-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .pager-count {
+      font-size: 13px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    /* ── トースト ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 12px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.3s ease;
+      z-index: 100;
+      white-space: nowrap;
+    }
+    .toast.show    { transform: translateX(-50%) translateY(0); }
+    .toast.success { border-color: var(--accent); color: var(--accent); }
+    .toast.error   { border-color: #f74f4f; color: #f74f4f; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="judogi-icon">🥋</div>
+  <h1>柔道練習ログ</h1>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" id="tabRecord" onclick="switchTab('record')">📝 記録</button>
+  <button class="tab-btn" id="tabReview" onclick="switchTab('review')">📖 振り返り</button>
+</nav>
+
+<!-- 記録タブ -->
+<main id="recordView">
+  <div class="card">
+    <div class="card-label">練習内容</div>
+    <textarea id="practice" placeholder="今日やった技、乱取り、打ち込みなど"></textarea>
+  </div>
+  <div class="card">
+    <div class="card-label">反省点</div>
+    <textarea id="reflection" placeholder="次に活かしたいこと、気づいたことなど"></textarea>
+  </div>
+  <button class="submit-btn" id="submitBtn" onclick="submitLog()">記録する</button>
+</main>
+
+<!-- 振り返りタブ -->
+<main id="reviewView" style="display:none;">
+  <div class="sort-toggle" id="sortToggle" style="display:none;">
+    <button class="sort-btn active" id="sortNewBtn" onclick="setSortMode('new')">🕐 新しい順</button>
+    <button class="sort-btn" id="sortRandomBtn" onclick="setSortMode('random')">🔀 ランダム</button>
+  </div>
+  <div class="review-status" id="reviewStatus">読み込み中…</div>
+  <div id="cardContainer"></div>
+  <div class="pager" id="pager" style="display:none;">
+    <button class="pager-btn" id="prevBtn" onclick="changeCard(-1)">← 前</button>
+    <span class="pager-count" id="pagerCount"></span>
+    <button class="pager-btn" id="nextBtn" onclick="changeCard(1)">次 →</button>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const GAS_URL = 'YOUR_GAS_WEB_APP_URL_HERE';
+
+  // ── タブ切り替え ──
+  let reviewLoaded = false;
+
+  function switchTab(tab) {
+    const recordView = document.getElementById('recordView');
+    const reviewView = document.getElementById('reviewView');
+    document.getElementById('tabRecord').classList.toggle('active', tab === 'record');
+    document.getElementById('tabReview').classList.toggle('active', tab === 'review');
+    recordView.style.display = tab === 'record' ? '' : 'none';
+    reviewView.style.display = tab === 'review' ? '' : 'none';
+    if (tab === 'review' && !reviewLoaded) loadReviewData();
+  }
+
+  // ── 振り返りデータ読み込み ──
+  let allRecords     = [];
+  let displayRecords = [];
+  let currentIndex   = 0;
+  let sortMode       = 'new';
+
+  function shuffleArray(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function setSortMode(mode) {
+    sortMode = mode;
+    document.getElementById('sortNewBtn').classList.toggle('active', mode === 'new');
+    document.getElementById('sortRandomBtn').classList.toggle('active', mode === 'random');
+    displayRecords = mode === 'random' ? shuffleArray(allRecords) : allRecords.slice();
+    currentIndex = 0;
+    renderCard();
+  }
+
+  async function loadReviewData() {
+    const status = document.getElementById('reviewStatus');
+    status.style.display = '';
+    status.textContent = '読み込み中…';
+
+    try {
+      const res  = await fetch(GAS_URL + '?action=list');
+      const data = await res.json();
+
+      if (data.status === 'ok') {
+        allRecords     = data.records;
+        displayRecords = allRecords.slice();
+        reviewLoaded   = true;
+
+        if (allRecords.length === 0) {
+          status.textContent = 'まだ記録がありません';
+          return;
+        }
+
+        status.style.display = 'none';
+        document.getElementById('sortToggle').style.display = '';
+        currentIndex = 0;
+        renderCard();
+        document.getElementById('pager').style.display = '';
+      } else {
+        status.textContent = '読み込みエラー: ' + data.message;
+      }
+    } catch (err) {
+      status.textContent = '読み込みに失敗しました';
+    }
+  }
+
+  // ── カード描画 ──
+  function formatDatetime(raw) {
+    if (!raw) return '';
+    const d = new Date(raw);
+    if (isNaN(d.getTime())) return raw;
+    return d.toLocaleString('ja-JP', {
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit',
+    });
+  }
+
+  function renderCard() {
+    const record    = displayRecords[currentIndex];
+    const container = document.getElementById('cardContainer');
+
+    container.innerHTML = `
+      <div class="practice-card">
+        <div class="practice-date">${formatDatetime(record.datetime)}</div>
+        ${record.practice ? `
+        <div>
+          <div class="practice-section-label">練習内容</div>
+          <div class="practice-text">${record.practice}</div>
+        </div>` : ''}
+        ${record.reflection ? `
+        <div>
+          <div class="practice-section-label">反省点</div>
+          <div class="practice-text">${record.reflection}</div>
+        </div>` : ''}
+      </div>
+    `;
+
+    document.getElementById('pagerCount').textContent = `${currentIndex + 1} / ${displayRecords.length}`;
+    document.getElementById('prevBtn').disabled = currentIndex === 0;
+    document.getElementById('nextBtn').disabled = currentIndex === displayRecords.length - 1;
+  }
+
+  function changeCard(delta) {
+    currentIndex = Math.max(0, Math.min(currentIndex + delta, displayRecords.length - 1));
+    renderCard();
+  }
+
+  // ── 送信 ──
+  async function submitLog() {
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '送信中…';
+
+    const payload = {
+      practice:   document.getElementById('practice').value,
+      reflection: document.getElementById('reflection').value,
+    };
+
+    try {
+      const res  = await fetch(GAS_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (data.status === 'ok') {
+        showToast('✅ 記録しました', 'success');
+        document.getElementById('practice').value   = '';
+        document.getElementById('reflection').value = '';
+        reviewLoaded = false;
+      } else {
+        showToast('❌ エラー: ' + data.message, 'error');
+      }
+    } catch (err) {
+      showToast('❌ 送信に失敗しました', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '記録する';
+    }
+  }
+
+  // ── トースト ──
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+</script>
+
+</body>
+</html>
